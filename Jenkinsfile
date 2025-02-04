@@ -1,6 +1,6 @@
 node {
     stage('Checkout') {
-        git branch: 'master', url: 'https://github.com/jenkins-docs/simple-python-pyinstaller-app.git'
+        git branch: 'master', url: 'https://github.com/daffaverse/simple-python-pyinstaller-app.git'
     }
     
     docker.image('python:2-alpine').inside {
