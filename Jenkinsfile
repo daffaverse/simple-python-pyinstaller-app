@@ -15,10 +15,15 @@ node {
         }
     }
     
-    // docker.image('cdrx/pyinstaller-linux:python2').inside {
-    //     stage('Deliver') {
-    //         sh 'pyinstaller --onefile sources/add2vals.py'
-    //         archiveArtifacts 'dist/add2vals'
-    //     }
-    // }
+    stage('Manual Approval') {
+        input massage: 'Lanjutkan ke tahap Deploy?'
+    }
+
+    docker.image('cdrx/pyinstalller-linux:python2').inside {
+        stage('Deploy') {
+            sh 'pyinstaller --onefile sources/add2vals.py'
+            archiveArtifacts 'dist/add2vals'
+            sleep 60
+        }
+    }
 }
