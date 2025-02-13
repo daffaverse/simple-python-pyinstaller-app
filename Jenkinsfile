@@ -28,9 +28,11 @@ node {
             
             archiveArtifacts 'dist/add2vals'
             
-            sh '''
-                scp -o StrictHostKeyChecking=no dist/add2vals c312b4ky1672@34.68.250.168:/home/c312b4ky1672/
-            '''
+            sshagent(credentials: ['gcp-ssh-key']) {
+                sh '''
+                    scp -o StrictHostKeyChecking=no dist/add2vals c312b4ky1672@34.68.250.168:/home/c312b4ky1672/
+                '''
+            }
         }
     }
 }
