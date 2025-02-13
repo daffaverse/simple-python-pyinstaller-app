@@ -8,35 +8,48 @@ pipeline {
             }
         }
         
-        stage('Build and Test') {
-            steps {
-                script {
-                    // Build
-                    docker.image('python:2-alpine').inside {
-                        sh 'python -m py_compile sources/add2vals.py sources/calc.py'
-                    }
-                    
-                    // Test
-                    docker.image('qnib/pytest').inside {
-                        sh 'py.test --verbose --junit-xml test-reports/results.xml sources/test_calc.py'
-                        junit 'test-reports/results.xml'
-                    }
-                    
-                    // Create executable
-                    docker.image('cdrx/pyinstaller-linux:python2').inside {
-                        sh '''
-                            pyinstaller --onefile sources/add2vals.py
-                            ls -la dist/
-                        '''
-                    }
+        stage('Build') {
+            agent {
+                docker {
+                    image 'python:2-alpine'
+                    reuseNode true
                 }
+            }
+            steps {
+                sh 'python -m py_compile sources/add2vals.py sources/calc.py'
             }
         }
         
-        stage('Deploy') {
+        stage('Test') {
+            agent {
+                docker {
+                    image 'qnib/pytest'
+                    reuseNode true
+                }
+            }
             steps {
-                sshagent(['gcp-ssh-key']) {
+                sh 'py.test --verbose --junit-xml test-reports/results.xml sources/test_calc.py'
+                junit 'test-reports/results.xml'
+            }
+        }
+        
+        stage('Create Executable') {
+            agent {
+                docker {
+                    image 'cdrx/pyinstaller-linux:python2'
+                    reuseNode true
+                }
+            }
+            steps {
+                sh 'pyinstaller --onefile sources/add2vals.py'
+            }
+        }
+        
+        stage('Deploy to Cloud') {
+            steps {
+                sshagent(credentials: ['gcp-ssh-key']) {
                     sh '''
+                        ssh -o StrictHostKeyChecking=no c312b4ky1672@34.68.250.168 'mkdir -p /home/c312b4ky1672/app'
                         scp -o StrictHostKeyChecking=no dist/add2vals c312b4ky1672@34.68.250.168:/home/c312b4ky1672/app/
                         ssh -o StrictHostKeyChecking=no c312b4ky1672@34.68.250.168 'chmod +x /home/c312b4ky1672/app/add2vals'
                     '''
