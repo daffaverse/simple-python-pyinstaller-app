@@ -16,24 +16,25 @@ node {
         }
     }
     
-    stage('Deliver') {
+    stage('Create Executable') {
         docker.image('cdrx/pyinstaller-linux:python2').inside {
             sh 'pyinstaller --onefile sources/add2vals.py'
+            sh 'ls -la dist/'  // Verify artifact exists
         }
     }
     
     stage('Manual Approval') {
-        input message: 'Lanjutkan ke tahap Deploy?'
+        input message: 'Proceed with deployment to cloud VM?'
     }
     
-    stage('Deploy') {
+    stage('Deploy to Cloud') {
         sshagent(credentials: ['gcp-ssh-key']) {
             sh """
+                ssh -o StrictHostKeyChecking=no c312b4ky1672@34.68.250.168 'mkdir -p /home/c312b4ky1672/app'
                 scp -o StrictHostKeyChecking=no dist/add2vals c312b4ky1672@34.68.250.168:/home/c312b4ky1672/app/
                 ssh -o StrictHostKeyChecking=no c312b4ky1672@34.68.250.168 'chmod +x /home/c312b4ky1672/app/add2vals'
-                ssh -o StrictHostKeyChecking=no c312b4ky1672@34.68.250.168 'cd /home/c312b4ky1672/app && python3 -m http.server 8000 &'
             """
         }
-        echo 'Aplikasi berhasil di Deploy'
+        echo 'Artifact successfully deployed to cloud VM'
     }
 }
