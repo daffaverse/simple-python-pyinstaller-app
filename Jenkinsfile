@@ -1,60 +1,29 @@
-pipeline {
-    agent any
+node {
+    stage('Checkout') {
+        git branch: 'master', url: 'https://github.com/daffaverse/simple-python-pyinstaller-app.git'
+    }
     
-    stages {
-        stage('Checkout') {
-            steps {
-                git branch: 'master', url: 'https://github.com/daffaverse/simple-python-pyinstaller-app.git'
-            }
-        }
-        
+    docker.image('python:2-alpine').inside {
         stage('Build') {
-            agent {
-                docker {
-                    image 'python:2-alpine'
-                    reuseNode true
-                }
-            }
-            steps {
-                sh 'python -m py_compile sources/add2vals.py sources/calc.py'
-            }
+            sh 'python -m py_compile sources/add2vals.py sources/calc.py'
         }
-        
+    }
+    
+    docker.image('qnib/pytest').inside {
         stage('Test') {
-            agent {
-                docker {
-                    image 'qnib/pytest'
-                    reuseNode true
-                }
-            }
-            steps {
-                sh 'py.test --verbose --junit-xml test-reports/results.xml sources/test_calc.py'
-                junit 'test-reports/results.xml'
-            }
+            sh 'py.test --verbose --junit-xml test-reports/results.xml sources/test_calc.py'
         }
-        
-        stage('Create Executable') {
-            agent {
-                docker {
-                    image 'cdrx/pyinstaller-linux:python2'
-                    reuseNode true
-                }
-            }
-            steps {
-                sh 'pyinstaller --onefile sources/add2vals.py'
-            }
-        }
-        
-        stage('Deploy to Cloud') {
-            steps {
-                sshagent(credentials: ['gcp-ssh-key']) {
-                    sh '''
-                        ssh -o StrictHostKeyChecking=no c312b4ky1672@34.68.250.168 'mkdir -p /home/c312b4ky1672/app'
-                        scp -o StrictHostKeyChecking=no dist/add2vals c312b4ky1672@34.68.250.168:/home/c312b4ky1672/app/
-                        ssh -o StrictHostKeyChecking=no c312b4ky1672@34.68.250.168 'chmod +x /home/c312b4ky1672/app/add2vals'
-                    '''
-                }
-            }
+    }
+    
+    stage('Manual Approval') {
+        input massage: 'Lanjutkan ke tahap Deploy?'
+    }
+
+    docker.image('cdrx/pyinstalller-linux:python2').inside {
+        stage('Deploy') {
+            sh 'pyinstaller --onefile sources/add2vals.py'
+            archiveArtifacts 'dist/add2vals'
+            sleep 60
         }
     }
 }
