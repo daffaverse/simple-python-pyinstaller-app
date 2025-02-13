@@ -20,17 +20,16 @@ node {
     }
 
     stage('Deploy') {
-        docker.image('python:3.8-slim').inside {
+        docker.image('cdrx/pyinstaller-linux').inside {
             sh '''
-                apt-get update && apt-get install -y python3-pip
-                pip3 install --no-cache-dir pyinstaller --break-system-packages
                 pyinstaller --onefile sources/add2vals.py
             '''
             
             archiveArtifacts 'dist/add2vals'
             
             sh '''
-                apt-get update && apt-get install -y openssh-client
+                apt-get update -y
+                apt-get install -y openssh-client
                 mkdir -p ~/.ssh
                 ssh-keyscan -H 34.68.250.168 >> ~/.ssh/known_hosts
                 scp -o StrictHostKeyChecking=no dist/add2vals c312b4ky1672@34.68.250.168:/home/c312b4ky1672/
