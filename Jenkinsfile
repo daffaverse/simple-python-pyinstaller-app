@@ -23,10 +23,9 @@ node {
     stage('Deploy') {
         sshagent(['gcp-ssh-key']) {
             sh """
-                ssh -o StrictHostKeyChecking=no c312b4ky1672@34.68.250.168 'source /path/to/venv/bin/activate && pyinstaller --onefile /path/to/sources/add2vals.py && chmod +x /path/to/dist/add2vals'
+                ssh -o StrictHostKeyChecking=no c312b4ky1672@34.68.250.168 'source ~/venv/bin/activate && pyinstaller --onefile ~/sources/add2vals.py && chmod +x ~/dist/add2vals'
             """
         }
-        
         echo 'Aplikasi berhasil di Deploy'
         sleep time: 60, unit: 'SECONDS'
     }
