@@ -20,10 +20,9 @@ node {
     }
 
     stage('Deploy') {
-        docker.image('cdrx/pyinstaller-linux:python3').inside('-u root') {
+        docker.image('python:3.8').inside('-u root') {
             sh '''
-                mkdir -p /var/jenkins_home/workspace
-                chmod -R 777 /var/jenkins_home/workspace
+                python -m pip install pyinstaller
                 pyinstaller --onefile sources/add2vals.py
             '''
             
