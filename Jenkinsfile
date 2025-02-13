@@ -20,17 +20,15 @@ node {
     }
 
     stage('Deploy') {
-        // Using python:3.8-slim instead of cdrx/pyinstaller-linux
         docker.image('python:3.8-slim').inside {
             sh '''
-                pip install pyinstaller
+                apt-get update && apt-get install -y python3-pip
+                pip3 install --no-cache-dir pyinstaller --break-system-packages
                 pyinstaller --onefile sources/add2vals.py
             '''
             
-            // Archive the artifact locally
             archiveArtifacts 'dist/add2vals'
             
-            // Copy to GCP VM using scp
             sh '''
                 apt-get update && apt-get install -y openssh-client
                 mkdir -p ~/.ssh
