@@ -27,8 +27,8 @@ node {
             
             sshagent(['gcp-ssh-key']) {
                 sh """
-                    scp -o StrictHostKeyChecking=no dist/add2vals c312b4ky1672@34.143.130.225:/home/c312b4ky1672/python-app/
-                    ssh -o StrictHostKeyChecking=no c312b4ky1672@34.143.130.225 'chmod +x ~/python-app/add2vals'
+                    scp -o StrictHostKeyChecking=no dist/add2vals c312b4ky1672@34.59.141.57:/home/c312b4ky1672/python-app/
+                    ssh -o StrictHostKeyChecking=no c312b4ky1672@34.59.141.57 'chmod +x ~/python-app/add2vals'
                 """
                 sleep 60
             }
