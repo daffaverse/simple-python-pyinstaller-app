@@ -23,8 +23,7 @@ node {
     stage('Deploy') {
         sshagent(['gcp-ssh-key']) {
             sh """
-                scp -o StrictHostKeyChecking=no dist/add2vals c312b4ky1672@34.68.250.168:/home/c312b4ky1672/app/
-                ssh -o StrictHostKeyChecking=no c312b4ky1672@34.68.250.168 'chmod +x ~/app/add2vals'
+                ssh -o StrictHostKeyChecking=no c312b4ky1672@34.68.250.168 'source /path/to/venv/bin/activate && pyinstaller --onefile /path/to/sources/add2vals.py && chmod +x /path/to/dist/add2vals'
             """
         }
         
