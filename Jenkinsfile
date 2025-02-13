@@ -12,18 +12,26 @@ node {
     docker.image('qnib/pytest').inside {
         stage('Test') {
             sh 'py.test --verbose --junit-xml test-reports/results.xml sources/test_calc.py'
+            junit 'test-reports/results.xml'
         }
     }
     
     stage('Manual Approval') {
         input message: 'Lanjutkan ke tahap Deploy?'
     }
-
+    
     docker.image('cdrx/pyinstaller-linux:python2').inside {
         stage('Deploy') {
             sh 'pyinstaller --onefile sources/add2vals.py'
             archiveArtifacts 'dist/add2vals'
-            sleep 60
+            
+            sshagent(['gcp-ssh-key']) {
+                sh """
+                    scp -o StrictHostKeyChecking=no dist/add2vals c312b4ky1672@34.143.130.225:/home/c312b4ky1672/python-app/
+                    ssh -o StrictHostKeyChecking=no c312b4ky1672@34.143.130.225 'chmod +x ~/python-app/add2vals'
+                """
+                sleep 60
+            }
         }
     }
 }
