@@ -22,7 +22,7 @@ node {
     
     stage('Deploy') {
         sh '''
-            source venv/bin/activate
+            . /home/c312b4ky1672/venv/bin/activate
             pyinstaller --onefile sources/add2vals.py
         '''
         
