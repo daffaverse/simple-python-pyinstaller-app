@@ -22,7 +22,11 @@ node {
     
     stage('Deploy') {
         sh '''
+            if [ ! -d "/home/c312b4ky1672/venv" ]; then
+                python3 -m venv /home/c312b4ky1672/venv
+            fi
             . /home/c312b4ky1672/venv/bin/activate
+            pip install pyinstaller
             pyinstaller --onefile sources/add2vals.py
         '''
         
