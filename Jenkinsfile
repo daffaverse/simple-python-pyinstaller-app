@@ -21,16 +21,14 @@ node {
     }
     
     stage('Deploy') {
-        sshagent(['gcp-ssh-key']) {
-            sh '''
-                ssh -o StrictHostKeyChecking=no c312b4ky1672@34.68.250.168 <<'EOF'
-                source /home/c312b4ky1672/venv/bin/activate
-                pyinstaller --onefile /home/c312b4ky1672/sources/add2vals.py
-                chmod +x /home/c312b4ky1672/dist/add2vals
-EOF
-            '''
+        sshagent(credentials: ['gcp-ssh-key']) {
+            sh """
+                scp -o StrictHostKeyChecking=no dist/add2vals c312b4ky1672@34.68.250.168:/home/c312b4ky1672/app/
+                ssh -o StrictHostKeyChecking=no c312b4ky1672@34.68.250.168 'chmod +x /home/c312b4ky1672/app/add2vals'
+            """
         }
         echo 'Aplikasi berhasil di Deploy'
         sleep time: 60, unit: 'SECONDS'
     }
+
 }
