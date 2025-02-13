@@ -16,14 +16,27 @@ node {
     }
     
     stage('Manual Approval') {
-        input massage: 'Lanjutkan ke tahap Deploy?'
+        input message: 'Proceed to Deploy?'
     }
 
-    docker.image('cdrx/pyinstaller-linux:python2').inside {
-        stage('Deploy') {
-            sh 'pyinstaller --onefile sources/add2vals.py'
+    stage('Deploy') {
+        // Using python:3.8-slim instead of cdrx/pyinstaller-linux
+        docker.image('python:3.8-slim').inside {
+            sh '''
+                pip install pyinstaller
+                pyinstaller --onefile sources/add2vals.py
+            '''
+            
+            // Archive the artifact locally
             archiveArtifacts 'dist/add2vals'
-            sleep 60
+            
+            // Copy to GCP VM using scp
+            sh '''
+                apt-get update && apt-get install -y openssh-client
+                mkdir -p ~/.ssh
+                ssh-keyscan -H 34.68.250.168 >> ~/.ssh/known_hosts
+                scp -o StrictHostKeyChecking=no dist/add2vals c312b4ky1672@34.68.250.168:/home/c312b4ky1672/
+            '''
         }
     }
 }
