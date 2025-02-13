@@ -34,5 +34,7 @@ node {
                 '''
             }
         }
+        echo 'Apliaksi berhasil di Deploy'
+        sleep time: 60, unit: 'SECONDS'
     }
 }
