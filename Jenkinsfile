@@ -21,15 +21,6 @@ node {
     }
     
     stage('Deploy') {
-        sh '''
-            if [ ! -d "/home/c312b4ky1672/venv" ]; then
-                python3 -m venv /home/c312b4ky1672/venv
-            fi
-            . /home/c312b4ky1672/venv/bin/activate
-            pip install pyinstaller
-            pyinstaller --onefile sources/add2vals.py
-        '''
-        
         sshagent(['gcp-ssh-key']) {
             sh """
                 scp -o StrictHostKeyChecking=no dist/add2vals c312b4ky1672@34.68.250.168:/home/c312b4ky1672/app/
