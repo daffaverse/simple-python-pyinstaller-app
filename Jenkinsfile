@@ -20,7 +20,7 @@ node {
         input message: 'Lanjutkan ke tahap Deploy?'
     }
     
-    docker.image('cdrx/pyinstaller-linux:python2').inside {
+    docker.image('cdrx/pyinstaller-linux:python2').inside('--privileged') {
         stage('Deploy') {
             sh 'pyinstaller --onefile sources/add2vals.py'
             archiveArtifacts 'dist/add2vals'
